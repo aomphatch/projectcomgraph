@@ -1,0 +1,1340 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Load GLB</title>
+    <style>
+        body { margin: 0; overflow: hidden; }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/dat.gui@0.7.7/build/dat.gui.min.js"></script>
+</head>
+
+<body>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/EXRLoader.js"></script>
+
+    <script>
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        document.body.appendChild(renderer.domElement);
+
+        const scene = new THREE.Scene();
+
+        // โหลด EXR environment
+        const exrLoader = new THREE.EXRLoader();
+        exrLoader.load('https://aomphatch.github.io/comgraphproj/dikhololo_night_1k.exr', (texture) => {
+            texture.mapping = THREE.EquirectangularReflectionMapping;
+            scene.background = texture;
+            scene.environment = texture;
+        });
+
+        // กล้อง
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.2, 1000);
+        camera.position.set(5.6, 0.6, 6.2);
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+        // --- เพิ่มตัวแปรเก็บมุมกล้องเริ่มต้น ---
+        const initialCameraPosition = camera.position.clone();
+        const initialCameraTarget = controls.target.clone();
+
+        // --- เพิ่มตัวแปรเก็บมุมกล้องของ station1 ---
+        let station2CameraPosition = null;
+        let station2CameraTarget = null;
+
+        // เพิ่มตัวแปรเก็บมุมกล้องของ station2
+        let station3CameraPosition = null;
+        let station3CameraTarget = null;
+
+        // เพิ่มตัวแปรเก็บมุมกล้องของ station3
+        let station4CameraPosition = null;
+        let station4CameraTarget = null;
+
+
+        // แสง
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+        scene.add(ambientLight);
+
+        /*Light1-8 TO HEAVEN*/
+        const pointLight = new THREE.PointLight(0xffdd00, 0.8, 8);  //(สี, ความเข้มแสง, distance – ระยะที่แสงจะมีผล)
+        pointLight.position.set(-8, 3, 3);
+        pointLight.castShadow = true;
+        scene.add(pointLight);
+        
+/*
+        const pointLight2 = new THREE.PointLight(0xffdd00, 1.0, 6);  //(สี, ความเข้มแสง, distance – ระยะที่แสงจะมีผล)
+        pointLight2.position.set(7.1, 0.5, -1.6);
+        pointLight2.castShadow = false;
+        scene.add(pointLight2);
+        const pointLightHelper2 = new THREE.PointLightHelper(pointLight2, 1);   //ตัวช่วยที่ทำให้เห็นตำแหน่งของหลอดไฟ
+        scene.add(pointLightHelper2);*/
+        const rectAreaLight = new THREE.RectAreaLight(0xfff68f, 1, 2, 4);  //(สี, ความเข้มแสง, distance – ระยะที่แสงจะมีผล)
+        rectAreaLight.position.set(7.1, 0.5, -1.6);
+        rectAreaLight.castShadow = true;
+        scene.add(rectAreaLight);
+
+        const pointLight3 = new THREE.PointLight(0xfff68f, 1.0, 4);  //(สี, ความเข้มแสง, distance – ระยะที่แสงจะมีผล)
+        pointLight3.position.set(5.95, 0.8 , -1.15);
+        pointLight3.castShadow = false;
+        scene.add(pointLight3);
+        
+        const pointLight4 = new THREE.PointLight(0xfff68f, 1.0, 4);  //(สี, ความเข้มแสง, distance – ระยะที่แสงจะมีผล)
+        pointLight4.position.set(8.3, 0.8 , -1.15);
+        pointLight4.castShadow = true;
+        scene.add(pointLight4);
+/*
+        const pointLight5 = new THREE.PointLight(0xffdd00, 1.0, 4);  //(สี, ความเข้มแสง, distance – ระยะที่แสงจะมีผล)
+        pointLight5.position.set(8.1, 0.8 , -4.1);
+        pointLight5.castShadow = true;
+        scene.add(pointLight5);
+        const pointLightHelper5 = new THREE.PointLightHelper(pointLight5, 0.2);   //ตัวช่วยที่ทำให้เห็นตำแหน่งของหลอดไฟ
+        scene.add(pointLightHelper5);
+
+        // pointLight6
+        const pointLight6 = new THREE.PointLight(0xffaa33, 1.0, 4);
+        pointLight6.position.set(5.5, 0.8 , -4.1);
+        pointLight6.castShadow = true;
+        scene.add(pointLight6);
+        const pointLightHelper6 = new THREE.PointLightHelper(pointLight6, 0.2);
+        scene.add(pointLightHelper6);
+*/
+        // pointLight7
+        const pointLight7 = new THREE.PointLight(0xffdd00, 1.0, 20);
+        pointLight7.position.set(8.1, 0.8 , -7.3);
+        pointLight7.castShadow = true;
+        scene.add(pointLight7);
+
+        // pointLight8
+        const pointLight8 = new THREE.PointLight(0xffdd00, 1.0, 15);
+        pointLight8.position.set(5.5, 0.8 , -7.3);
+        pointLight8.castShadow = false;
+        scene.add(pointLight8);
+
+        /* ophelia*/
+        // linear light
+        const pointLight9 = new THREE.PointLight(0xffcc99, 2.0 , 8);
+        pointLight9.position.set(-3.5, 0.8, 0.5);
+        pointLight9.castShadow = false;
+        scene.add(pointLight9);
+/*
+        // pointLight10
+        const pointLight10 = new THREE.PointLight(0xffffff, 0.8, 4);
+        pointLight10.position.set(-5.5, 0.8, -0.1);
+        pointLight10.castShadow = false;
+        scene.add(pointLight10);
+        const pointLightHelper10 = new THREE.PointLightHelper(pointLight10, 0.2);
+        scene.add(pointLightHelper10);
+*/
+        // linear light
+        const pointLight11 = new THREE.PointLight(0xffcc99, 0.7 , 8);
+        pointLight11.position.set(-1.1, 0.8, 0.5);
+        pointLight11.castShadow = false;
+        scene.add(pointLight11);
+/*
+        // pointLight12
+        const pointLight12 = new THREE.PointLight(0xccff99, 1.0, 4);
+        pointLight12.position.set(1.5, 0.8, -0.1);
+        pointLight12.castShadow = false;
+        scene.add(pointLight12);
+        const pointLightHelper12 = new THREE.PointLightHelper(pointLight12, 0.2);
+        scene.add(pointLightHelper12);
+  */      
+        // linear light
+        const pointLight13 = new THREE.PointLight(0xffdd00, 1.0, 4);
+        pointLight13.position.set(4.2, 0.8, -0.1);
+        pointLight13.castShadow = false;
+        scene.add(pointLight13);
+
+        // linear light
+        const pointLight14 = new THREE.PointLight(0xffcc99, 2.0, 4);
+        pointLight14.position.set(1.5, 0.8, -1.5);
+        pointLight14.castShadow = false;
+        scene.add(pointLight14);
+        
+        /*StreetLight*/
+        // right light
+        const pointLight15 = new THREE.PointLight(0xffdd00, 0.9, 4);
+        pointLight15.position.set(4.2, 0.8, -2.5);
+        pointLight15.castShadow = false;
+        scene.add(pointLight15);
+
+        // right light
+        const pointLight16 = new THREE.PointLight(0xffdd00, 1.0, 4);
+        pointLight16.position.set(4.2, 0.8, 2.5);
+        pointLight16.castShadow = false;
+        scene.add(pointLight16);
+
+        // right light
+        const pointLight17 = new THREE.PointLight(0xffdd00, 1.5, 5);
+        pointLight17.position.set(4.2, 0.8, 4.5);
+        pointLight17.castShadow = true;
+        scene.add(pointLight17);
+
+        // name
+        const pointLight18 = new THREE.PointLight(0xffcc99, 1.5, 4);
+        pointLight18.position.set(2.8, 0.5, 5.8);
+        pointLight18.castShadow = false;
+        scene.add(pointLight18);
+
+        // bus stop light
+        const pointLight19 = new THREE.PointLight(0xffcc99, 1.5, 10);
+        pointLight19.position.set(8.4, 0.8, 5.0);
+        pointLight19.castShadow = false;
+        scene.add(pointLight19);
+
+        // in bus stop light
+        const pointLight20 = new THREE.PointLight(0xffffff, 2.0, 5);
+        pointLight20.position.set(6.3, 0.75, 4.3);
+        pointLight20.castShadow = true;
+        scene.add(pointLight20);
+        ////////////
+        // left light
+        const pointLight21 = new THREE.PointLight(0xffdd00, 1.5, 2);
+        pointLight21.position.set(-1.1, 0.8, 2.2);
+        pointLight21.castShadow = true; // ปิดเงาเพื่อลดโหลด
+        scene.add(pointLight21);
+
+        // left light
+        const pointLight22 = new THREE.PointLight(0xffdd00, 1.5, 8);
+        pointLight22.position.set(-1.1, 0.8, 4.6);
+        pointLight22.castShadow = false;
+        scene.add(pointLight22);
+
+        // kaya light
+        const pointLight23 = new THREE.PointLight(0xffcc99, 5, 5);
+        pointLight23.position.set(-4.9, 0.8, 4.8);
+        pointLight23.castShadow = true;
+        scene.add(pointLight23);
+
+
+        const gltfLoader = new THREE.GLTFLoader();
+        //const arcade = 'https://aomphatch.github.io/comgraphproj/arcade.glb';
+        const shop = 'https://aomphatch.github.io/projectcomgraph/shop.glb';
+        const tomb = 'https://aomphatch.github.io/projectcomgraph/tomb.glb';
+        const streetlight = 'https://aomphatch.github.io/projectcomgraph/streetlight.glb';
+        const convex = 'https://aomphatch.github.io/projectcomgraph/convex.glb';
+        const busstop = 'https://aomphatch.github.io/projectcomgraph/busstop.glb';
+        const vespa = 'https://aomphatch.github.io/projectcomgraph/vespa.glb';
+        //const busstopboard = 'https://aomphatch.github.io/projectcomgraph/busstopboard.glb';
+        const hotel = 'https://aomphatch.github.io/projectcomgraph/hotel.glb';
+        const name = 'https://aomphatch.github.io/projectcomgraph/name.glb';
+        const street = 'https://aomphatch.github.io/projectcomgraph/street.glb';
+        const toheavenshop = 'https://aomphatch.github.io/projectcomgraph/toheavenshop.glb';
+        const bin = 'https://aomphatch.github.io/projectcomgraph/bin.glb';
+        const tree = 'https://aomphatch.github.io/projectcomgraph/tree.glb';
+        const dolphin = 'https://aomphatch.github.io/projectcomgraph/dolphin.glb';
+        
+        const sign = 'https://aomphatch.github.io/projectcomgraph/sign.glb'; 
+        const firstchoice = 'https://aomphatch.github.io/projectcomgraph/firstchoice.glb';
+        const secondchoice = 'https://aomphatch.github.io/projectcomgraph/secondchoice.glb';
+        const thirdchoice = 'https://aomphatch.github.io/projectcomgraph/thirdchoice.glb';
+
+        const station1 = 'https://aomphatch.github.io/projectcomgraph/station1.glb';
+        const station2 = 'https://aomphatch.github.io/projectcomgraph/station2.glb';
+        const station3 = 'https://aomphatch.github.io/projectcomgraph/station3.glb';
+        const station4 = 'https://aomphatch.github.io/projectcomgraph/station4.glb';
+        const credit = 'https://aomphatch.github.io/projectcomgraph/credit.glb';
+
+        const backfromname = 'https://aomphatch.github.io/projectcomgraph/backfromname.glb';
+        const backfromcredit = 'https://aomphatch.github.io/projectcomgraph/backfromcredit.glb';
+        const nextfromstation1 = 'https://aomphatch.github.io/projectcomgraph/nextfromstation1.glb';
+        const backfromstation1 = 'https://aomphatch.github.io/projectcomgraph/backfromstation1.glb';
+        const nextfromstation2 = 'https://aomphatch.github.io/projectcomgraph/nextfromstation2.glb';
+        const backfromstation2 = 'https://aomphatch.github.io/projectcomgraph/backfromstation2.glb';
+        const nextfromstation3 = 'https://aomphatch.github.io/projectcomgraph/nextfromstation3.glb';
+        const backfromstation3 = 'https://aomphatch.github.io/projectcomgraph/backfromstation3.glb';
+        const backfromstation4 = 'https://aomphatch.github.io/projectcomgraph/backfromstation4.glb';
+
+
+
+        // ประกาศตัวแปรไว้ด้านบน
+        let firstchoiceModel = null;
+        let secondchoiceModel = null;
+        let thirdchoiceModel = null;
+        let nameModel = null;
+        let backfromnameModel = null;
+        let creditModel = null;
+        let backfromcreditModel = null;
+        let station1Model = null;
+        let nextfromstation1Model = null;
+        let backfromstation1Model = null;
+        let station2Model = null;
+        let nextfromstation2Model = null;
+        let backfromstation2Model = null;
+        let station3Model = null;
+        let nextfromstation3Model = null;
+        let backfromstation3Model = null;
+        let station4Model = null;
+        let backfromstation4Model = null;
+
+        /*Shop Loader*/
+        gltfLoader.load(
+           shop,
+            (gltf) => {
+                const shopModel = gltf.scene;
+
+                shopModel.traverse((child) => {
+                    if (child.isMesh && child.material && child.material.isMeshStandardMaterial) {
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+
+                        const mat = child.material;
+                        const meshName = child.name || `Mesh ${child.id}`; // ถ้าไม่มีชื่อ ตั้งเป็น Mesh + id
+                        }
+                });
+
+                scene.add(shopModel);
+                console.log("GLB loaded successfully");
+            },
+            undefined,
+            (error) => {
+                console.error("Error loading GLB:", error);
+            }
+        );
+
+        /*ToheavenShop Loader*/
+        gltfLoader.load(
+           toheavenshop,
+            (gltf) => {
+                const toheavenshopModel = gltf.scene;
+
+                toheavenshopModel.traverse((child) => {
+                    if (child.isMesh && child.material && child.material.isMeshStandardMaterial) {
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+
+                        const mat = child.material;
+                        const meshName = child.name || `Mesh ${child.id}`; // ถ้าไม่มีชื่อ ตั้งเป็น Mesh + id
+                        }
+                });
+
+                scene.add(toheavenshopModel);
+                console.log("GLB loaded successfully");
+            },
+            undefined,
+            (error) => {
+                console.error("Error loading GLB:", error);
+            }
+        );
+
+        /*Tomb Loader*/
+        gltfLoader.load(
+           tomb,
+            (gltf) => {
+                const tombModel = gltf.scene;
+
+                tombModel.traverse((child) => {
+                    if (child.isMesh && child.material && child.material.isMeshStandardMaterial) {
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+
+                        // 🔧 ตั้งค่า roughness / metalness ตรงนี้
+                        child.material.roughness = 1.0;   // ค่าระหว่าง 0 = มันวาว มาก → 1 = ด้าน
+                        //child.material.metalness = 0.2;   // ค่าระหว่าง 0 = ไม่เป็นโลหะ → 1 = โลหะ
+                    }
+                });
+
+                scene.add(tombModel);
+                console.log("GLB loaded successfully");
+            },
+            undefined,
+            (error) => {
+                console.error("Error loading GLB:", error);
+            }
+        );
+
+        /*StreetLight Loader*/
+        gltfLoader.load(
+           streetlight,
+            (gltf) => {
+                const streetlightModel = gltf.scene;
+
+                streetlightModel.traverse((child) => {
+                    if (child.isMesh && child.material && child.material.isMeshStandardMaterial) {
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+
+                        const mat = child.material;
+                        const meshName = child.name || `Mesh ${child.id}`; // ถ้าไม่มีชื่อ ตั้งเป็น Mesh + id
+                        }
+                });
+
+                scene.add(streetlightModel);
+                console.log("GLB loaded successfully");
+            },
+            undefined,
+            (error) => {
+                console.error("Error loading GLB:", error);
+            }
+        );  
+
+        /*Convex Loader*/
+        gltfLoader.load(
+           convex,
+            (gltf) => {
+                const convexModel = gltf.scene;
+
+                convexModel.traverse((child) => {
+                    if (child.isMesh && child.material && child.material.isMeshStandardMaterial) {
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+
+                        child.material.metalness = 0.9;   // ค่าระหว่าง 0 = ไม่เป็นโลหะ → 1 = โลหะ
+                        const mat = child.material;
+                        const meshName = child.name || `Mesh ${child.id}`; // ถ้าไม่มีชื่อ ตั้งเป็น Mesh + id
+                        }
+                });
+
+                scene.add(convexModel);
+                console.log("GLB loaded successfully");
+            },
+            undefined,
+            (error) => {
+                console.error("Error loading GLB:", error);
+            }
+        );  
+
+        /*Busstop Loader*/
+        gltfLoader.load(
+           busstop,
+            (gltf) => {
+                const busstopModel = gltf.scene;
+
+                busstopModel.traverse((child) => {
+                    if (child.isMesh && child.material && child.material.isMeshStandardMaterial) {
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+
+                        const mat = child.material;
+                        const meshName = child.name || `Mesh ${child.id}`; // ถ้าไม่มีชื่อ ตั้งเป็น Mesh + id
+                        }
+                });
+
+                scene.add(busstopModel);
+                console.log("GLB loaded successfully");
+            },
+            undefined,
+            (error) => {
+                console.error("Error loading GLB:", error);
+            }
+        );
+
+        /*Hotel Loader*/
+        gltfLoader.load(
+           hotel,
+            (gltf) => {
+                const hotelModel = gltf.scene;
+
+                hotelModel.traverse((child) => {
+                    if (child.isMesh && child.material && child.material.isMeshStandardMaterial) {
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+
+                        const mat = child.material;
+                        const meshName = child.name || `Mesh ${child.id}`; // ถ้าไม่มีชื่อ ตั้งเป็น Mesh + id
+                        }
+                });
+
+                scene.add(hotelModel);
+                console.log("GLB loaded successfully");
+            },
+            undefined,
+            (error) => {
+                console.error("Error loading GLB:", error);
+            }
+        );
+
+        /*Name Loader*/
+        gltfLoader.load(
+           name,
+            (gltf) => {
+                nameModel = gltf.scene;
+
+                nameModel.traverse((child) => {
+                    if (child.isMesh && child.material && child.material.isMeshStandardMaterial) {
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+
+                        const mat = child.material;
+                        const meshName = child.name || `Mesh ${child.id}`; // ถ้าไม่มีชื่อ ตั้งเป็น Mesh + id
+                        }
+                });
+
+                scene.add(nameModel);
+                console.log("GLB loaded successfully");
+            },
+            undefined,
+            (error) => {
+                console.error("Error loading GLB:", error);
+            }
+        );
+
+        /*Street Loader*/
+        gltfLoader.load(
+           street,
+            (gltf) => {
+                const streetModel = gltf.scene;
+
+               streetModel.traverse((child) => {
+                    if (child.isMesh && child.material && child.material.isMeshStandardMaterial) {
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+
+                        const mat = child.material;
+                        const meshName = child.name || `Mesh ${child.id}`; // ถ้าไม่มีชื่อ ตั้งเป็น Mesh + id
+                        }
+                });
+
+                scene.add(streetModel);
+                console.log("GLB loaded successfully");
+            },
+            undefined,
+            (error) => {
+                console.error("Error loading GLB:", error);
+            }
+        );
+
+        /*Vespa Loader*/
+        gltfLoader.load(
+           vespa,
+            (gltf) => {
+                const vespaModel = gltf.scene;
+
+                vespaModel.traverse((child) => {
+                    if (child.isMesh && child.material && child.material.isMeshStandardMaterial) {
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+
+                        // 🔧 ตั้งค่า roughness / metalness ตรงนี้
+                        child.material.roughness = 0.2;   // ค่าระหว่าง 0 = มันวาว มาก → 1 = ด้าน
+                        child.material.metalness = 0.5;   // ค่าระหว่าง 0 = ไม่เป็นโลหะ → 1 = โลหะ
+                    }
+                });     
+
+                scene.add(vespaModel);
+                console.log("GLB loaded successfully");
+            },
+            undefined,
+            (error) => {
+                console.error("Error loading GLB:", error);
+            }
+        );  
+
+        /*Bin Loader*/
+        gltfLoader.load(
+           bin,
+            (gltf) => {
+                const binModel = gltf.scene;
+
+                binModel.traverse((child) => {
+                    if (child.isMesh && child.material && child.material.isMeshStandardMaterial) {
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+
+                    }
+                });     
+
+                scene.add(binModel);
+                console.log("GLB loaded successfully");
+            },
+            undefined,
+            (error) => {
+                console.error("Error loading GLB:", error);
+            }
+        );  
+
+        /*Tree Loader*/
+        gltfLoader.load(
+           tree,
+            (gltf) => {
+                const treeModel = gltf.scene;
+
+                treeModel.traverse((child) => {
+                    if (child.isMesh && child.material && child.material.isMeshStandardMaterial) {
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+                    }
+                });     
+
+                scene.add(treeModel);
+                console.log("GLB loaded successfully");
+            },
+            undefined,
+            (error) => {
+                console.error("Error loading GLB:", error);
+            }
+        );  
+
+        /* =================== Dolphin Cell Shader =================== */
+
+        // Vertex Shader ของ dolphin
+        const dolphinvert = `
+        uniform float dolphinuTime;
+        varying vec3 dolphinvNormal;
+        varying vec3 dolphinvPosW;
+        varying vec2 dolphinvUv;
+
+        void main(){
+            dolphinvNormal = normalize(mat3(modelMatrix) * normal);
+            vec3 dolphinPos = position;
+
+            dolphinvUv = uv;
+            dolphinvPosW = (modelMatrix * vec4(dolphinPos, 1.0)).xyz;
+
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(dolphinPos, 1.0);
+        }
+        `;
+
+        // Fragment Shader ของ dolphin
+        const dolphinfrag = `
+        precision mediump float;
+        varying vec3 dolphinvNormal;
+        uniform vec3 dolphinuLightDir;
+        varying vec3 dolphinvPosW;
+        varying vec2 dolphinvUv;
+        uniform sampler2D dolphinuTex;
+
+        void main(){
+            float diffuse = clamp(dot(dolphinvNormal, dolphinuLightDir), 0.0, 1.0);
+            float levels = 5.0;
+            diffuse = floor(diffuse * levels) / levels;
+            diffuse += 0.5;
+
+            vec3 R = reflect(-dolphinuLightDir, dolphinvNormal);
+            vec3 V = normalize(cameraPosition - dolphinvPosW);
+            float specular = max(pow(dot(R,V),8.0), 0.0);
+            specular = smoothstep(0.4, 0.6, specular);
+            specular = clamp(specular, 0.0, 0.5);
+            if(diffuse <= 0.5) specular = 0.0;
+
+            vec3 base = texture2D(dolphinuTex, dolphinvUv).rgb;
+            vec3 color = (base * diffuse) + vec3(specular);
+
+            gl_FragColor = vec4(color,1.0);
+        }
+        `;
+
+        /* =================== Dolphin Loader with Cell Shader =================== */
+
+        gltfLoader.load(
+            dolphin,
+            (gltf) => {
+                const dolphinModel = gltf.scene;
+
+                // เปลี่ยน material ของทุก mesh เป็น ShaderMaterial ของ dolphin
+                dolphinModel.traverse((child) => {
+                    if (child.isMesh) {
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+
+                        // ใช้ texture จาก GLB ถ้ามี ไม่งั้นโหลด default
+                        const tex = child.material && child.material.map 
+                                    ? child.material.map 
+                                    : new THREE.TextureLoader().load('https://aomphatch.github.io/projectcomgraph/01___Default.001_diffuse.jpeg');
+
+                        // สร้าง uniforms สำหรับแต่ละ mesh
+                        const uniforms = {
+                            dolphinuTime: { value: 0.0 }, // คงไว้ แต่ไม่อัปเดต
+                            dolphinuLightDir: { value: new THREE.Vector3(0.5, 1.0, 0).normalize() }, // คงที่
+                            dolphinuTex: { value: tex }
+                        };
+
+                        // สร้าง ShaderMaterial
+                        child.material = new THREE.ShaderMaterial({
+                            uniforms: uniforms,
+                            vertexShader: dolphinvert,
+                            fragmentShader: dolphinfrag
+                        });
+                    }
+                });
+
+                // เซตตำแหน่ง dolphin
+                dolphinModel.position.set(0.3, 0.2, 3);
+
+                // เพิ่ม dolphin ลง scene
+                scene.add(dolphinModel);
+                console.log("GLB loaded successfully");
+            },
+            undefined,
+            (error) => {
+                console.error("Error loading GLB:", error);
+            }
+        );
+
+
+
+        /*Sign Loader*/
+        gltfLoader.load(
+           sign,
+            (gltf) => {
+                const signModel = gltf.scene;
+
+                signModel.traverse((child) => {
+                    if (child.isMesh && child.material && child.material.isMeshStandardMaterial) {
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+                    }
+                });     
+
+                scene.add(signModel);
+                console.log("GLB loaded successfully");
+            },
+            undefined,
+            (error) => {
+                console.error("Error loading GLB:", error);
+            }
+        );  
+
+        /*Firstchoice Loader*/
+        gltfLoader.load(
+           firstchoice,
+            (gltf) => {
+               firstchoiceModel = gltf.scene;
+
+               firstchoiceModel.traverse((child) => {
+                    if (child.isMesh && child.material && child.material.isMeshStandardMaterial) {
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+                    }
+                });     
+
+                scene.add(firstchoiceModel);
+                console.log("GLB loaded successfully");
+            },
+            undefined,
+            (error) => {
+                console.error("Error loading GLB:", error);
+            }
+        ); 
+
+        /*Secondchoice Loader*/
+        gltfLoader.load(
+           secondchoice,
+            (gltf) => {
+                secondchoiceModel = gltf.scene;
+
+               secondchoiceModel.traverse((child) => {
+                    if (child.isMesh && child.material && child.material.isMeshStandardMaterial) {
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+                    }
+                });     
+
+                scene.add(secondchoiceModel);
+                console.log("GLB loaded successfully");
+            },
+            undefined,
+            (error) => {
+                console.error("Error loading GLB:", error);
+            }
+        ); 
+
+        /*Thirdchoice Loader*/
+        gltfLoader.load(
+           thirdchoice,
+            (gltf) => {
+               thirdchoiceModel = gltf.scene;
+
+               thirdchoiceModel.traverse((child) => {
+                    if (child.isMesh && child.material && child.material.isMeshStandardMaterial) {
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+                    }
+                });     
+
+                scene.add(thirdchoiceModel);
+                console.log("GLB loaded successfully");
+            },
+            undefined,
+            (error) => {
+                console.error("Error loading GLB:", error);
+            }
+        ); 
+        
+        /*Backfromname Loader*/
+        gltfLoader.load(
+           backfromname,
+            (gltf) => {
+                backfromnameModel = gltf.scene;
+
+               backfromnameModel.traverse((child) => {
+                    if (child.isMesh && child.material && child.material.isMeshStandardMaterial) {
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+                    }
+                });     
+
+                scene.add(backfromnameModel);
+                console.log("GLB loaded successfully");
+            },
+            undefined,
+            (error) => {
+                console.error("Error loading GLB:", error);
+            }
+        ); 
+
+        /*Station1 Loader*/
+        gltfLoader.load(
+           station1,
+            (gltf) => {
+                station1Model = gltf.scene;
+
+                station1Model.traverse((child) => {
+                    if (child.isMesh && child.material && child.material.isMeshStandardMaterial) {
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+
+                        const mat = child.material;
+                        const meshName = child.name || `Mesh ${child.id}`; // ถ้าไม่มีชื่อ ตั้งเป็น Mesh + id
+                        }
+                });
+
+                scene.add(station1Model);
+                console.log("GLB loaded successfully");
+            },
+            undefined,
+            (error) => {
+                console.error("Error loading GLB:", error);
+            }
+        );
+
+         /*Backfromstation1 Loader*/
+        gltfLoader.load(
+           backfromstation1,
+            (gltf) => {
+                backfromstation1Model = gltf.scene;
+
+               backfromstation1Model.traverse((child) => {
+                    if (child.isMesh && child.material && child.material.isMeshStandardMaterial) {
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+                    }
+                });     
+
+                scene.add(backfromstation1Model);
+                console.log("GLB loaded successfully");
+            },
+            undefined,
+            (error) => {
+                console.error("Error loading GLB:", error);
+            }
+        ); 
+
+        /*Nextfromstation1 Loader*/
+        gltfLoader.load(
+           nextfromstation1,
+            (gltf) => {
+                nextfromstation1Model = gltf.scene;
+
+               nextfromstation1Model.traverse((child) => {
+                    if (child.isMesh && child.material && child.material.isMeshStandardMaterial) {
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+                    }
+                });     
+
+                scene.add(nextfromstation1Model);
+                console.log("GLB loaded successfully");
+            },
+            undefined,
+            (error) => {
+                console.error("Error loading GLB:", error);
+            }
+        ); 
+
+        /*Station2 Loader*/
+        gltfLoader.load(
+           station2,
+            (gltf) => {
+                station2Model = gltf.scene;
+
+                station2Model.traverse((child) => {
+                    if (child.isMesh && child.material && child.material.isMeshStandardMaterial) {
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+
+                        const mat = child.material;
+                        const meshName = child.name || `Mesh ${child.id}`; // ถ้าไม่มีชื่อ ตั้งเป็น Mesh + id
+                        }
+                });
+
+                scene.add(station2Model);
+                console.log("GLB loaded successfully");
+            },
+            undefined,
+            (error) => {
+                console.error("Error loading GLB:", error);
+            }
+        );
+
+         /*Backfromstation2 Loader*/
+        gltfLoader.load(
+           backfromstation2,
+            (gltf) => {
+                backfromstation2Model = gltf.scene;
+
+               backfromstation2Model.traverse((child) => {
+                    if (child.isMesh && child.material && child.material.isMeshStandardMaterial) {
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+                    }
+                });     
+
+                scene.add(backfromstation2Model);
+                console.log("GLB loaded successfully");
+            },
+            undefined,
+            (error) => {
+                console.error("Error loading GLB:", error);
+            }
+        ); 
+
+        /*Nextfromstation2 Loader*/
+        gltfLoader.load(
+           nextfromstation2,
+            (gltf) => {
+                nextfromstation2Model = gltf.scene;
+
+               nextfromstation2Model.traverse((child) => {
+                    if (child.isMesh && child.material && child.material.isMeshStandardMaterial) {
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+                    }
+                });     
+
+                scene.add(nextfromstation2Model);
+                console.log("GLB loaded successfully");
+            },
+            undefined,
+            (error) => {
+                console.error("Error loading GLB:", error);
+            }
+        ); 
+
+        /*Station3 Loader*/
+        gltfLoader.load(
+           station3,
+            (gltf) => {
+                station3Model = gltf.scene;
+
+                station3Model.traverse((child) => {
+                    if (child.isMesh && child.material && child.material.isMeshStandardMaterial) {
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+
+                        const mat = child.material;
+                        const meshName = child.name || `Mesh ${child.id}`; // ถ้าไม่มีชื่อ ตั้งเป็น Mesh + id
+                        }
+                });
+
+                scene.add(station3Model);
+                console.log("GLB loaded successfully");
+            },
+            undefined,
+            (error) => {
+                console.error("Error loading GLB:", error);
+            }
+        );
+
+         /*Backfromstation3 Loader*/
+        gltfLoader.load(
+           backfromstation3,
+            (gltf) => {
+                backfromstation3Model = gltf.scene;
+
+               backfromstation3Model.traverse((child) => {
+                    if (child.isMesh && child.material && child.material.isMeshStandardMaterial) {
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+                    }
+                });     
+
+                scene.add(backfromstation3Model);
+                console.log("GLB loaded successfully");
+            },
+            undefined,
+            (error) => {
+                console.error("Error loading GLB:", error);
+            }
+        ); 
+
+        /*Nextfromstation3 Loader*/
+        gltfLoader.load(
+           nextfromstation3,
+            (gltf) => {
+                nextfromstation3Model = gltf.scene;
+
+               nextfromstation3Model.traverse((child) => {
+                    if (child.isMesh && child.material && child.material.isMeshStandardMaterial) {
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+                    }
+                });     
+
+                scene.add(nextfromstation3Model);
+                console.log("GLB loaded successfully");
+            },
+            undefined,
+            (error) => {
+                console.error("Error loading GLB:", error);
+            }
+        ); 
+
+        /*Station4 Loader*/
+        gltfLoader.load(
+           station4,
+            (gltf) => {
+                station4Model = gltf.scene;
+
+                station4Model.traverse((child) => {
+                    if (child.isMesh && child.material && child.material.isMeshStandardMaterial) {
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+
+                        const mat = child.material;
+                        const meshName = child.name || `Mesh ${child.id}`; // ถ้าไม่มีชื่อ ตั้งเป็น Mesh + id
+                        }
+                });
+
+                scene.add(station4Model);
+                console.log("GLB loaded successfully");
+            },
+            undefined,
+            (error) => {
+                console.error("Error loading GLB:", error);
+            }
+        );
+
+        /*Backfromstation4 Loader*/
+        gltfLoader.load(
+           backfromstation4,
+            (gltf) => {
+                backfromstation4Model = gltf.scene;
+
+               backfromstation4Model.traverse((child) => {
+                    if (child.isMesh && child.material && child.material.isMeshStandardMaterial) {
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+                    }
+                });     
+
+                scene.add(backfromstation4Model);
+                console.log("GLB loaded successfully");
+            },
+            undefined,
+            (error) => {
+                console.error("Error loading GLB:", error);
+            }
+        ); 
+
+         /*Credit Loader*/
+        gltfLoader.load(
+           credit,
+            (gltf) => {
+                creditModel = gltf.scene;
+
+                creditModel.traverse((child) => {
+                    if (child.isMesh && child.material && child.material.isMeshStandardMaterial) {
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+
+                        const mat = child.material;
+                        const meshName = child.name || `Mesh ${child.id}`; // ถ้าไม่มีชื่อ ตั้งเป็น Mesh + id
+                        }
+                });
+
+                scene.add(creditModel);
+                console.log("GLB loaded successfully");
+            },
+            undefined,
+            (error) => {
+                console.error("Error loading GLB:", error);
+            }
+        );
+
+         /*Backfromcredit Loader*/
+        gltfLoader.load(
+           backfromcredit,
+            (gltf) => {
+                backfromcreditModel = gltf.scene;
+
+               backfromcreditModel.traverse((child) => {
+                    if (child.isMesh && child.material && child.material.isMeshStandardMaterial) {
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+                    }
+                });     
+
+                scene.add(backfromcreditModel);
+                console.log("GLB loaded successfully");
+            },
+            undefined,
+            (error) => {
+                console.error("Error loading GLB:", error);
+            }
+        ); 
+
+
+        // Raycaster ตรวจจับคลิก
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+
+        window.addEventListener('click', (event) => {
+            if (!secondchoiceModel || !nameModel || !backfromnameModel || !firstchoiceModel || !station1Model || !backfromstation1Model || !nextfromstation1Model || !station2Model || !backfromstation2Model || !nextfromstation2Model || !station3Model || !backfromstation3Model || !nextfromstation3Model || !station4Model || !backfromstation4Model|| !creditModel || !backfromcreditModel ) return;
+
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+            raycaster.setFromCamera(mouse, camera);
+
+            // --- คลิก firstchoice: จำมุมกล้อง แล้วแพลนไป station1 ---
+            const intersectsFirst = raycaster.intersectObjects(firstchoiceModel.children, true);
+            if (intersectsFirst.length > 0) {
+                // จำมุมกล้องเดิมของ firstchoice
+                station1CameraPosition = camera.position.clone();
+                station1CameraTarget = controls.target.clone();
+
+                // แพลนไป station1
+                const box = new THREE.Box3().setFromObject(station1Model);
+                const center = box.getCenter(new THREE.Vector3());
+                camera.position.set(center.x, center.y + 0.2, center.z + 1); // ปรับเลขนี้ได้
+                camera.lookAt(center);
+                controls.target.copy(center);
+                controls.update();
+                return;
+            }
+
+            // --- คลิก backfromstation1: กลับมุมกล้องเดิมของ firstchoice ---
+            const intersectsBackStation1 = raycaster.intersectObjects(backfromstation1Model.children, true);
+            if (intersectsBackStation1.length > 0 && station1CameraPosition && station1CameraTarget) {
+                camera.position.copy(station1CameraPosition);
+                controls.target.copy(station1CameraTarget);
+                controls.update();
+                return;
+            }
+
+            // --- คลิก nextfromstation1: จำมุมกล้อง station1 แล้วแพลนไป station2 ---
+            const intersectsNextStation1 = raycaster.intersectObjects(nextfromstation1Model.children, true);
+            if (intersectsNextStation1.length > 0) {
+                // จำมุมกล้องเดิมของ station1
+                station2CameraPosition = camera.position.clone();
+                station2CameraTarget = controls.target.clone();
+
+                // แพลนไป station2
+                const box = new THREE.Box3().setFromObject(station2Model);
+                const center = box.getCenter(new THREE.Vector3());
+                camera.position.set(center.x+0.05, center.y + 0.3, center.z - 1.25); // ปรับเลขนี้ได้
+                camera.lookAt(center);
+                controls.target.copy(center);
+                controls.update();
+                return;
+            }
+
+            // --- คลิก backfromstation2: กลับมุมกล้องเดิมของ station1 ---
+            const intersectsBackStation2 = raycaster.intersectObjects(backfromstation2Model.children, true);
+            if (intersectsBackStation2.length > 0 && station2CameraPosition && station2CameraTarget) {
+                camera.position.copy(station2CameraPosition);
+                controls.target.copy(station2CameraTarget);
+                controls.update();
+                return;
+            }
+
+            // --- คลิก nextfromstation2: จำมุมกล้อง station2 แล้วแพลนไป station3 ---
+            const intersectsNextStation2 = raycaster.intersectObjects(nextfromstation2Model.children, true);
+            if (intersectsNextStation2.length > 0) {
+                // จำมุมกล้องเดิมของ station2
+                station3CameraPosition = camera.position.clone();
+                station3CameraTarget = controls.target.clone();
+
+                // แพลนไป station3
+                const box = new THREE.Box3().setFromObject(station3Model);
+                const center = box.getCenter(new THREE.Vector3());
+                camera.position.set(center.x, center.y + 0.05, center.z + 1); // ปรับเลขนี้ได้
+                camera.lookAt(center);
+                controls.target.copy(center);
+                controls.update();
+                return;
+            }
+
+            // --- คลิก backfromstation3: กลับมุมกล้องเดิมของ station2 ---
+            const intersectsBackStation3 = raycaster.intersectObjects(backfromstation3Model.children, true);
+            if (intersectsBackStation3.length > 0 && station3CameraPosition && station3CameraTarget) {
+                camera.position.copy(station3CameraPosition);
+                controls.target.copy(station3CameraTarget);
+                controls.update();
+                return;
+            }
+
+            // --- คลิก nextfromstation3: จำมุมกล้อง station3 แล้วแพลนไป station4 ---
+            const intersectsNextStation3 = raycaster.intersectObjects(nextfromstation3Model.children, true);
+            if (intersectsNextStation3.length > 0) {
+                // จำมุมกล้องเดิมของ station3
+                station4CameraPosition = camera.position.clone();
+                station4CameraTarget = controls.target.clone();
+
+                // แพลนไป station4
+                const box = new THREE.Box3().setFromObject(station4Model);
+                const center = box.getCenter(new THREE.Vector3());
+                camera.position.set(center.x+0.95, center.y + 0.15, center.z - 0.15); // ปรับเลขนี้ได้
+                camera.lookAt(center);
+                controls.target.copy(center);
+                controls.update();
+                return;
+            }
+
+            // --- คลิก backfromstation4: กลับมุมกล้องเดิมของ station3 ---
+            const intersectsBackStation4 = raycaster.intersectObjects(backfromstation4Model.children, true);
+            if (intersectsBackStation4.length > 0 && station4CameraPosition && station4CameraTarget) {
+                camera.position.copy(station4CameraPosition);
+                controls.target.copy(station4CameraTarget);
+                controls.update();
+                return;
+            }
+
+            // ...โค้ดเดิมสำหรับ secondchoice, backfromname...
+            const intersectsSecond = raycaster.intersectObjects(secondchoiceModel.children, true);
+            if (intersectsSecond.length > 0) {
+                const box = new THREE.Box3().setFromObject(nameModel);
+                const center = box.getCenter(new THREE.Vector3());
+                camera.position.set(center.x, center.y + 0.2, center.z + 1.5);
+                camera.lookAt(center);
+                controls.target.copy(center);
+                controls.update();
+                return;
+            }
+
+            const intersectsBack = raycaster.intersectObjects(backfromnameModel.children, true);
+            if (intersectsBack.length > 0) {
+                camera.position.copy(initialCameraPosition);
+                controls.target.copy(initialCameraTarget);
+                controls.update();
+                return;
+            }
+
+            // ...โค้ดเดิมสำหรับ thirdchoice, backfromcredit...
+            const intersectsThird = raycaster.intersectObjects(thirdchoiceModel.children, true);
+            if (intersectsThird.length > 0) {
+                const box = new THREE.Box3().setFromObject(creditModel);
+                const center = box.getCenter(new THREE.Vector3());
+                camera.position.set(center.x + 1.3, center.y + 0.47 , center.z + 0.05);
+                camera.lookAt(center);
+                controls.target.copy(center);
+                controls.update();
+                return;
+            }
+
+            const intersectsBackCredit = raycaster.intersectObjects(backfromcreditModel.children, true);
+            if (intersectsBackCredit.length > 0) {
+                camera.position.copy(initialCameraPosition);
+                controls.target.copy(initialCameraTarget);
+                controls.update();
+                return;
+            }
+        });
+
+
+        // พื้น
+        const floorTex = new THREE.TextureLoader().load('https://aomphatch.github.io/comgraphproj/rocky_terrain_02_diff_1k.jpg', t => {
+            t.wrapS = t.wrapT = THREE.RepeatWrapping;
+        });
+
+        // ใช้ BoxGeometry แทน PlaneGeometry เพื่อให้พื้นมีความหนา
+        const floor = new THREE.Mesh(
+        new THREE.BoxGeometry(18, 0.5, 16), // เพิ่มความหนา 0.5
+        new THREE.MeshStandardMaterial({ map: floorTex })
+        );
+
+        // ไม่ต้องหมุน เพราะ Box มีความหนาแล้ว
+        //floor.position.y = -0.25; // ให้พื้นอยู่ระดับเดิม (ครึ่งหนึ่งของความหนา)
+        floor.position.set(0,-0.25,-2.1);
+        floor.receiveShadow = true;
+        scene.add(floor);
+
+       // ==== สร้าง Uniforms สำหรับ heightmap ====
+        const uniforms = {
+        uTime: { value: 0.0 },
+        uHeight: { value: null }
+        };
+
+        // ==== Vertex Shader (ขยับ vertex ตาม grayscale texture) ====
+        const vert = `
+        uniform sampler2D uHeight;
+        uniform float uTime;
+        varying float vH;
+
+        void main() {
+            vec3 pos = position;
+            float h = texture2D(uHeight, uv).r;
+
+            // ทำให้ขยับขึ้นลงตาม texture + คลื่นเบาๆ
+            float wave = sin(uTime + pos.x * 2.0 + pos.y * 2.5) * 0.1;
+            pos.z += h * 0.6 + wave;
+
+            vH = h;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+        }
+        `;
+
+        // ==== Fragment Shader (ระบายสีตามความสูง) ====
+        const frag = `
+        precision mediump float;
+        varying float vH;
+        void main() {
+            vec3 lowColor = vec3(0.0, 0.3, 0.8);   // น้ำเงินเข้ม (ต่ำ)
+            vec3 highColor = vec3(0.8, 0.9, 1.0);  // ฟ้าอ่อน (สูง)
+            vec3 color = mix(lowColor, highColor, vH);
+            gl_FragColor = vec4(color, 1.0);
+        }
+        `;
+
+        // ==== โหลด heightmap texture แล้วสร้าง plane ====
+        const heightmapURL = 'https://aomphatch.github.io/projectcomgraph/e6b83165-09f5-4b75-ba55-27979ce72da0.png';
+
+        new THREE.TextureLoader().load(heightmapURL, (tex) => {
+        tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+        uniforms.uHeight.value = tex;
+
+        // ขนาด plane ให้พอดีกับกล่องของคุณ
+        const planeGeo = new THREE.PlaneGeometry(1, 16, 150, 150);
+        const planeMat = new THREE.ShaderMaterial({
+            vertexShader: vert,
+            fragmentShader: frag,
+            uniforms: uniforms,
+            side: THREE.DoubleSide
+        });
+
+        const plane = new THREE.Mesh(planeGeo, planeMat);
+        plane.rotation.x = -Math.PI / 2; // วางราบ
+        plane.position.set(-8,0.02,0);// ให้อยู่บนกล่อง (ถ้ากล่องสูง 1)
+
+        // แปะ plane บนกล่องที่มีอยู่แล้ว
+        floor.add(plane);
+        });
+
+        const waterplaneGeo = new THREE.BoxGeometry(16, 0.25, 1) // กว้าง 10 สูง 10
+        const waterplaneMat = new THREE.MeshStandardMaterial({
+        color: 0x1566ff,       // สีน้ำเงิน
+        side: THREE.DoubleSide // ให้เห็นทั้งสองด้าน
+        });
+
+        const waterplane = new THREE.Mesh(waterplaneGeo, waterplaneMat);
+        waterplane.rotation.y = -Math.PI / 2; // หมุนให้นอนราบ
+        waterplane.position.set(-8,-0.12,-2);     // วางตรงกลาง
+        scene.add(waterplane);
+
+
+
+        // Render loop
+        function animate() {
+            requestAnimationFrame(animate);
+            uniforms.uTime.value += 0.04;
+            renderer.render(scene, camera);
+        }
+        animate();
+        
+    </script>
+</body>
+
+</html>
